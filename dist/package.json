@@ -1,0 +1,21 @@
+{
+  "name": "ckrbn",
+  "version": "1.0.0",
+  "description": "ckrbn",
+  "license": "ISC",
+  "author": "oomhary",
+  "main": "main.js",
+  "type": "module",
+  "scripts": {
+    "start": "node main.js"
+  },
+  "devDependencies": {
+    "@types/node": "^24.3.0",
+    "typescript": "^5.9.2"
+  },
+  "dependencies": {
+    "cheerio": "^1.1.2",
+    "dayjs": "^1.11.18",
+    "firebase-admin": "^13.5.0"
+  }
+}
