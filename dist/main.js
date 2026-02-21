@@ -108,6 +108,49 @@ async function readCurrent(extend = false) {
     }
     throw Error("Data unavailable");
 }
+async function stagedData(stagedData, currentData) {
+    try {
+        const staged = {
+            captured_at: stagedData.captured_at,
+            gold: {
+                buyback: stagedData.gold.buyback,
+                sell: stagedData.gold.sell,
+                difference: {
+                    last_update: stagedData.gold.buyback.last_update,
+                    price: stagedData.gold.sell.price - stagedData.gold.buyback.price
+                },
+                change: {
+                    last_update: stagedData.gold.buyback.last_update,
+                    price: stagedData.gold.buyback.price - currentData.gold.buyback.price
+                },
+                sign: {
+                    last_update: stagedData.gold.buyback.last_update,
+                    price: Math.sign(stagedData.gold.buyback.price - currentData.gold.buyback.price)
+                }
+            },
+            silver: {
+                buyback: stagedData.silver.buyback,
+                sell: stagedData.silver.sell,
+                difference: {
+                    last_update: '-1',
+                    price: -1
+                },
+                change: {
+                    last_update: stagedData.silver.sell.last_update,
+                    price: stagedData.silver.sell.price - currentData.silver.sell.price
+                },
+                sign: {
+                    last_update: stagedData.silver.sell.last_update,
+                    price: Math.sign(stagedData.silver.sell.price - currentData.silver.sell.price)
+                }
+            }
+        };
+        return staged;
+    }
+    catch (err) {
+        throw err;
+    }
+}
 async function pushToDatabase(stagedData, currentData) {
     try {
         const staged = {
@@ -146,15 +189,21 @@ async function pushToDatabase(stagedData, currentData) {
             }
         };
         await db.ref('/current').set(staged);
-        await db.ref('/history').push(currentData);
+        await db.ref('/history').push(staged);
         return staged;
     }
     catch (err) {
         throw err;
     }
 }
+async function _temp_function_migrate() {
+    let staged = stagedData(await scrapeAndFormatAll(), await readCurrent(true));
+    await db.ref("/history").push(await readCurrent(true));
+    console.log("done.");
+}
 // push
 // console.log(await pushToDatabase(await scrapeAndFormatAll(), await readCurrent(true) as DBCompliantExtendedFormat)
-console.log(await scrape('gold'));
+//console.log(await scrape('gold'))
+console.log(await _temp_function_migrate());
 // end
 await admin.app().delete();
